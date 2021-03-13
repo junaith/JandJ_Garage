@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/junaith/JandJ_Garage/issues"
   },
-  "homepage": "https://github.com/junaith/JandJ_Garage#readme"
+  "homepage": "https://github.com/junaith/JandJ_Garage#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "helmet": "^4.4.1",
+    "sqlite3": "^5.0.2"
+  }
 }
