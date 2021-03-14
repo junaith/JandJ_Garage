@@ -5,14 +5,13 @@ var http = require('http');
 var path = require("path");
 var bodyParser = require('body-parser');
 var helmet = require('helmet');
-//var rateLimit = require("express-rate-limit");
 
 //  --------------------------------------------------- End Required Node Modules-----------------------------------------------------------------------
 
 //  --------------------------------------------------- Begin Database Settings -----------------------------------------------------------------------
 var db = new sqlite3.Database('./database/jandj.db');
 db.run('CREATE TABLE IF NOT EXISTS user(id	INTEGER NOT NULL ,userName	TEXT NOT NULL, password	TEXT NOT NULL, userGroup	TEXT NOT NULL,PRIMARY KEY(id AUTOINCREMENT))');
-db.run('CREATE TABLE IF NOT EXISTS devices("id"	INTEGER NOT NULL,"device"	TEXT NOT NULL,	"os"	TEXT NOT NULL,"manufacturer"	TEXT NOT NULL,"lastCheckedOutDate"	TEXT,"lastCheckedOutBy"	TEXT,"isCheckedOut"	TEXT NOT NULL,PRIMARY KEY("id" AUTOINCREMENT))');
+db.run('CREATE TABLE IF NOT EXISTS devices(id	INTEGER NOT NULL, device	TEXT NOT NULL,	os	TEXT NOT NULL, manufacturer	TEXT NOT NULL, lastCheckedOutDate	TEXT, lastCheckedOutBy	TEXT, isCheckedOut	TEXT NOT NULL, PRIMARY KEY(id AUTOINCREMENT))');
 
 //  --------------------------------------------------- End Database Settings -----------------------------------------------------------------------
 
@@ -20,22 +19,9 @@ db.run('CREATE TABLE IF NOT EXISTS devices("id"	INTEGER NOT NULL,"device"	TEXT N
 var app = express();
 var server = http.createServer(app);
 
-/* const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
-}); */
-
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, './public')));
 app.use(helmet());
-//app.use(limiter);
-
-
-
-/* app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, './public/index.html'));
-}); */
 
 //  --------------------------------------------------- End App Settings ---------------------------------------------------------------------------
 
@@ -49,7 +35,6 @@ var loggedInName = "";
 
 //  --------------------------------------------------- Begin User CRUD Functions -----------------------------------------------------------------------
 // Add New User
-
 app.post('/AddUser', function (req, res) {
   db.serialize(() => {
     db.run('INSERT INTO user(userName,password,userGroup) VALUES(?,?,?)',
@@ -68,7 +53,7 @@ app.post('/AddUser', function (req, res) {
 // Get User By ID
 app.get('/ViewUserByID', function (req, res) {
   db.serialize(() => {
-    db.each('SELECT id ID, userName NAME, userGroup UserGroup FROM user WHERE id =?', [req.body.id], function (err, row) {     //db.each() is only one which is funtioning while reading data from the DB
+    db.each('SELECT id ID, userName NAME, userGroup UserGroup FROM user WHERE id =?', [req.body.id], function (err, row) {
       if (err) {
         res.send("Error encountered while displaying");
         return console.error(err.message);
@@ -93,7 +78,7 @@ app.get('/ViewAllUsers', function (req, res) {
   });
 });
 
-//db.each('SELECT id ID, userName NAME, userGroup UserGroup FROM emp WHERE id =?', [req.body.id], function (err, row) {
+
 // User Login
 app.get('/Login', function (req, res) {
   db.serialize(() => {
