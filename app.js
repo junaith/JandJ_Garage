@@ -123,7 +123,7 @@ app.put('/Update/UserGroup/:id', function (req, res) {
 });
 
 // Delete User
-app.delete('/Delete/ :id', function (req, res) {
+app.delete('/DeleteUser', function (req, res) {
   db.serialize(() => {
     db.run('DELETE FROM user WHERE id = ?', req.body.id, function (err) {
       if (err) {
@@ -134,7 +134,6 @@ app.delete('/Delete/ :id', function (req, res) {
       console.log("User deleted");
     });
   });
-
 });
 
 //  --------------------------------------------------- End User CRUD Functions -----------------------------------------------------------------------
@@ -161,6 +160,19 @@ app.post('/AddDevice', function (req, res) {
   });
 });
 
+// Delete Device
+app.delete('/DeleteDevice/', function (req, res) {
+  db.serialize(() => {
+    db.run('DELETE FROM devices WHERE id = ?', req.body.id, function (err) {
+      if (err) {
+        res.send("Error encountered while deleting");
+        return console.error(err.message);
+      }
+      res.send("Device deleted");
+      console.log("Device deleted");
+    });
+  });
+});
 // Get All Devices
 app.get('/ViewAllDevices', function (req, res) {
   db.serialize(() => {
