@@ -11,7 +11,7 @@ var helmet = require('helmet');
 
 //  --------------------------------------------------- Begin Database Settings -----------------------------------------------------------------------
 var db = new sqlite3.Database('./database/jandj.db');
-db.run('CREATE TABLE IF NOT EXISTS user(id	INTEGER NOT NULL ,userName	TEXT NOT NULL, password	TEXT NOT NULL,userGroup	TEXT NOT NULL,PRIMARY KEY(id AUTOINCREMENT))');
+db.run('CREATE TABLE IF NOT EXISTS user(id	INTEGER NOT NULL ,userName	TEXT NOT NULL, password	TEXT NOT NULL, userGroup	TEXT NOT NULL,PRIMARY KEY(id AUTOINCREMENT))');
 db.run('CREATE TABLE IF NOT EXISTS devices("id"	INTEGER NOT NULL,"device"	TEXT NOT NULL,	"os"	TEXT NOT NULL,"manufacturer"	TEXT NOT NULL,"lastCheckedOutDate"	TEXT,"lastCheckedOutBy"	TEXT,"isCheckedOut"	TEXT NOT NULL,PRIMARY KEY("id" AUTOINCREMENT))');
 
 //  --------------------------------------------------- End Database Settings -----------------------------------------------------------------------
@@ -32,11 +32,19 @@ app.use(helmet());
 //app.use(limiter);
 
 
+
 /* app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, './public/index.html'));
 }); */
 
 //  --------------------------------------------------- End App Settings ---------------------------------------------------------------------------
+
+
+//  --------------------------------------------------- Begin Global Variables -----------------------------------------------------------------------
+
+var loggedInName = "";
+
+//  --------------------------------------------------- End Global Variables -----------------------------------------------------------------------
 
 
 //  --------------------------------------------------- Begin User CRUD Functions -----------------------------------------------------------------------
@@ -58,9 +66,9 @@ app.post('/AddUser', function (req, res) {
 });
 
 // Get User By ID
-app.get('/ViewUser/:Id', function (req, res) {
+app.get('/ViewUserByID', function (req, res) {
   db.serialize(() => {
-    db.each('SELECT id ID, userName NAME, userGroup UserGroup FROM emp WHERE id =?', [req.body.id], function (err, row) {     //db.each() is only one which is funtioning while reading data from the DB
+    db.each('SELECT id ID, userName NAME, userGroup UserGroup FROM user WHERE id =?', [req.body.id], function (err, row) {     //db.each() is only one which is funtioning while reading data from the DB
       if (err) {
         res.send("Error encountered while displaying");
         return console.error(err.message);
@@ -74,14 +82,29 @@ app.get('/ViewUser/:Id', function (req, res) {
 // Get All Users
 app.get('/ViewAllUsers', function (req, res) {
   db.serialize(() => {
-    db.each('SELECT id ID, userName NAME, userGroup UserGroup FROM user?', function (err, row) 
-    {     
+    db.each('SELECT id ID, userName NAME, userGroup UserGroup FROM user', function (err, row) {
       if (err) {
         res.send("Error encountered while displaying");
         return console.error(err.message);
       }
       res.send(` ID: ${row.ID},    Name: ${row.NAME}, User Group: ${row.UserGroup}`);
       console.log("Deatails for all Users are displayed successfully");
+    });
+  });
+});
+
+//db.each('SELECT id ID, userName NAME, userGroup UserGroup FROM emp WHERE id =?', [req.body.id], function (err, row) {
+// User Login
+app.get('/Login', function (req, res) {
+  db.serialize(() => {
+    db.each('SELECT userName NAME FROM user WHERE id=? and password =?', [req.body.id, req.body.password], function (err, row) {
+      if (err) {
+        res.send("Error encountered while displaying");
+        return console.error(err.message);
+      }
+      loggedInName = (`${row.NAME}`);
+      res.send(` Name: ${row.NAME}`);
+      console.log(loggedInName & " has logged in successfully");
     });
   });
 });
@@ -137,12 +160,11 @@ app.delete('/Delete/ :id', function (req, res) {
 app.post('/AddDevice', function (req, res) {
   db.serialize(() => {
     var deviceCount = "SELECT COUNT(*) FROM devices;";
-    if (deviceCount = 10)
-    {
+    if (deviceCount = 10) {
       console.log("A new device cannot be added as the inventory already has the maximum number of devices");
     }
     db.run('INSERT INTO devices(device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut) VALUES(?,?,?,?,?,?)',
-      [req.body.device, req.body.os, req.body.manufacturer,null, null, "false"],
+      [req.body.device, req.body.os, req.body.manufacturer, null, null, "false"],
       function (err) {
         if (err) {
           return console.log(err.message);
@@ -157,8 +179,7 @@ app.post('/AddDevice', function (req, res) {
 // Get All Devices
 app.get('/ViewAllDevices', function (req, res) {
   db.serialize(() => {
-    db.each('SELECT device Device,os OS,manufacturer Manufacturer,lastCheckedOutDate LastCheckedOutDate,lastCheckedOutBy LastCheckedOutBy,isCheckedOut IsCheckedOut FROM devices?', function (err, row) 
-    {    
+    db.each('SELECT device Device,os OS,manufacturer Manufacturer,lastCheckedOutDate LastCheckedOutDate,lastCheckedOutBy LastCheckedOutBy,isCheckedOut IsCheckedOut FROM devices?', function (err, row) {
       if (err) {
         res.send("Error encountered while displaying");
         return console.error(err.message);
@@ -170,7 +191,7 @@ app.get('/ViewAllDevices', function (req, res) {
 });
 
 // Get Device By ID
-app.get('/ViewDevice/:Id', function (req, res) {
+app.get('/ViewDeviceById', function (req, res) {
   db.serialize(() => {
     db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE id =?', [req.body.id], function (err, row) {     //db.each() is only one which is funtioning while reading data from the DB
       if (err) {
@@ -201,6 +222,20 @@ app.get('/ViewCheckedOutDevice', function (req, res) {
 app.get('/ViewNotCheckedOutDevice', function (req, res) {
   db.serialize(() => {
     db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE id =?', ["false"], function (err, row) {     //db.each() is only one which is funtioning while reading data from the DB
+      if (err) {
+        res.send("Error encountered while displaying");
+        return console.error(err.message);
+      }
+      res.send(` ID: ${row.ID}, Device: ${row.device}, OS: ${row.os}, Manufacturer: ${row.manufacturer}, Last Checked Out Date: ${row.lastCheckedOutDate}, Last Checked Out By: ${row.lastCheckedOutBy}, Is Checked Out: ${row.isCheckedOut}`);
+      console.log("Details for the requested device Id is  displayed successfully");
+    });
+  });
+});
+
+// Get Device Checked Out By Staff
+app.get('/ViewDeviceByStaff', function (req, res) {
+  db.serialize(() => {
+    db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE lastCheckedOutBy =?', [loggedInName], function (err, row) {     //db.each() is only one which is funtioning while reading data from the DB
       if (err) {
         res.send("Error encountered while displaying");
         return console.error(err.message);
