@@ -1,3 +1,4 @@
+//  --------------------------------------------------- Begin Required Node Modules-----------------------------------------------------------------------
 var sqlite3 = require('sqlite3').verbose();
 var express = require('express');
 var http = require('http');
@@ -6,8 +7,16 @@ var bodyParser = require('body-parser');
 var helmet = require('helmet');
 //var rateLimit = require("express-rate-limit");
 
+//  --------------------------------------------------- End Required Node Modules-----------------------------------------------------------------------
 
+//  --------------------------------------------------- Begin Database Settings -----------------------------------------------------------------------
+var db = new sqlite3.Database('./database/jandj.db');
+db.run('CREATE TABLE IF NOT EXISTS user("id"	INTEGER NOT NULL,"userName"	TEXT NOT NULL,"password"	TEXT NOT NULL,"userGroup"	TEXT NOT NULL,PRIMARY KEY("id" AUTOINCREMENT)');
+db.run('CREATE TABLE IF NOT EXISTS devices("id"	INTEGER NOT NULL,"device"	TEXT NOT NULL,	"os"	TEXT NOT NULL,"manufacturer"	TEXT NOT NULL,"lastCheckedOutDate"	TEXT,"lastCheckedOutBy"	TEXT,"isCheckedOut"	TEXT NOT NULL,PRIMARY KEY("id" AUTOINCREMENT)');
 
+//  --------------------------------------------------- End Database Settings -----------------------------------------------------------------------
+
+//  --------------------------------------------------- Begin App Settings -----------------------------------------------------------------------
 var app = express();
 var server = http.createServer(app);
 
@@ -16,14 +25,6 @@ var server = http.createServer(app);
     max: 100 // limit each IP to 100 requests per windowMs
 }); */
 
-// Database Settings
-var db = new sqlite3.Database('./database/employees.db');
-//db.run('CREATE TABLE IF NOT EXISTS emp(id TEXT, name TEXT)');
-db.run('CREATE TABLE IF NOT EXISTS user(userName TEXT, Password TEXT)');
-db.run('CREATE TABLE IF NOT EXISTS devices(id INTEGER, device TEXT, os TEXT, manufacturer TEXT, lastCheckedOutDate TEXT, lastCheckedOutBy	TEXT, isCheckedOut	TEXT)');
-
-//devices(id INTEGER, device 	TEXT, os TEXT, manufacturer	TEXT, lastCheckedOutDateTEXT, lastCheckedOutBy	TEXT, isCheckedOut	TEXT
-//)
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, './public')));
@@ -35,10 +36,12 @@ app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, './public/form.html'));
 });
 
+//  --------------------------------------------------- End App Settings ---------------------------------------------------------------------------
 
 
+//  --------------------------------------------------- Begin User CRUD Functions -----------------------------------------------------------------------
 // Add New User
-app.post('/add', function (req, res) {
+app.post('/Add', function (req, res) {
   db.serialize(() => {
     db.run('INSERT INTO user(userName,password) VALUES(?,?)', [req.body.userName, req.body.password], function (err) {
       if (err) {
@@ -50,7 +53,6 @@ app.post('/add', function (req, res) {
     });
 
   });
-
 });
 
 // Get User By ID
@@ -76,7 +78,14 @@ app.post('/view', function (req, res) {
 });
 
 
-// Closing the database connection.
+//  --------------------------------------------------- End User CRUD Functions -----------------------------------------------------------------------
+
+//  --------------------------------------------------- Begin Inventory Loan CRUD Functions -----------------------------------------------------------------------
+
+//  --------------------------------------------------- End Inventory Loan CRUD Functions -----------------------------------------------------------------------
+
+
+//  --------------------------------------------------- Begin Close The Database Connection -----------------------------------------------------------------------
 app.get('/close', function (req, res) {
   db.close((err) => {
     if (err) {
@@ -88,9 +97,14 @@ app.get('/close', function (req, res) {
   });
 
 });
+//  --------------------------------------------------- End Close The Database Connection -----------------------------------------------------------------------
 
 
 
-server.listen(3001, function () {
+
+//  --------------------------------------------------- Begin Server Listen Port -----------------------------------------------------------------------
+server.listen(3000, function () {
   console.log("server is listening on port: 3000");
-})
+});
+
+//  --------------------------------------------------- End Server Listen Port -----------------------------------------------------------------------
