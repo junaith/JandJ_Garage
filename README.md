@@ -5,7 +5,7 @@ JandJ Inventory Management System.
 This application has the CRUD functionalities to manage both Users and Devices.
 
 ## Modules and Database Used 
-This application uses the SQlite3 database.
+This application uses the sqlite3 database.
 
 The following modules are used to create and run this program:
 1. Express
