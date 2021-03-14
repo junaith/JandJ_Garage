@@ -73,7 +73,7 @@ app.get('/ViewAllUsers', function (req, res) {
         return console.error(err.message);
       }
       res.send(` ID: ${row.ID},    Name: ${row.NAME}, User Group: ${row.UserGroup}`);
-      console.log("Deatails for all Users are displayed successfully");
+      console.log("Details for all Users are displayed successfully");
     });
   });
 });
@@ -173,6 +173,7 @@ app.delete('/DeleteDevice/', function (req, res) {
     });
   });
 });
+
 // Get All Devices
 app.get('/ViewAllDevices', function (req, res) {
   db.serialize(() => {
@@ -190,7 +191,7 @@ app.get('/ViewAllDevices', function (req, res) {
 // Get Device By ID
 app.get('/ViewDeviceById', function (req, res) {
   db.serialize(() => {
-    db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE id =?', [req.body.id], function (err, row) {     //db.each() is only one which is funtioning while reading data from the DB
+    db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE id =?', [req.body.id], function (err, row) {
       if (err) {
         res.send("Error encountered while displaying");
         return console.error(err.message);
@@ -204,7 +205,7 @@ app.get('/ViewDeviceById', function (req, res) {
 // Get Checked Out Devices
 app.get('/ViewCheckedOutDevice', function (req, res) {
   db.serialize(() => {
-    db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE id =?', ["true"], function (err, row) {     //db.each() is only one which is funtioning while reading data from the DB
+    db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE id =?', ["true"], function (err, row) {
       if (err) {
         res.send("Error encountered while displaying");
         return console.error(err.message);
@@ -218,7 +219,7 @@ app.get('/ViewCheckedOutDevice', function (req, res) {
 // Get Not Checked Out Devices
 app.get('/ViewNotCheckedOutDevice', function (req, res) {
   db.serialize(() => {
-    db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE id =?', ["false"], function (err, row) {     //db.each() is only one which is funtioning while reading data from the DB
+    db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE id =?', ["false"], function (err, row) {
       if (err) {
         res.send("Error encountered while displaying");
         return console.error(err.message);
@@ -232,7 +233,7 @@ app.get('/ViewNotCheckedOutDevice', function (req, res) {
 // Get Device Checked Out By Staff
 app.get('/ViewDeviceByStaff', function (req, res) {
   db.serialize(() => {
-    db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE lastCheckedOutBy =?', [loggedInName], function (err, row) {     //db.each() is only one which is funtioning while reading data from the DB
+    db.each('SELECT device,os,manufacturer,lastCheckedOutDate,lastCheckedOutBy,isCheckedOut FROM devices WHERE lastCheckedOutBy =?', [loggedInName], function (err, row) {
       if (err) {
         res.send("Error encountered while displaying");
         return console.error(err.message);
@@ -242,6 +243,7 @@ app.get('/ViewDeviceByStaff', function (req, res) {
     });
   });
 });
+
 
 //  --------------------------------------------------- End Inventory Loan CRUD Functions -----------------------------------------------------------------------
 
